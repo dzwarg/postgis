@@ -251,8 +251,8 @@ CREATE OR REPLACE FUNCTION st_makeemptycoverage(tilewidth int, tileheight int,
     DECLARE
         ulx double precision;  -- upper left x of raster
         uly double precision;  -- upper left y of raster
-        rw int := width;       -- raster width (may change at edges)
-        rh int := height;      -- raster height (may change at edges)
+        rw int := tilewidth;   -- raster width (may change at edges)
+        rh int := tileheight;  -- raster height (may change at edges)
         x int;                 -- x index of coverage
         y int;                 -- y index of coverage
     BEGIN
@@ -261,18 +261,18 @@ CREATE OR REPLACE FUNCTION st_makeemptycoverage(tilewidth int, tileheight int,
             IF uly + tileheight >= upperlefty + height THEN
                 rh := upperlefty + height - uly;
             END IF;
+            rw := tileheight;
             FOR x IN 0..(ceil(width::float/tilewidth)-1) LOOP
                 ulx := upperleftx + x * tilewidth;
                 IF ulx + tilewidth >= upperleftx + width THEN
                     rw := upperleftx + width - ulx;
-                ELSE
-                    rw := height;
                 END IF;
                 RETURN NEXT ST_MakeEmptyRaster(rw, rh, ulx, uly, scalex, scaley, skewx, skewy, srid);
             END LOOP;
         END LOOP;
     END;
     $$ LANGUAGE 'plpgsql' IMMUTABLE STRICT;
+
 
 -----------------------------------------------------------------------
 -- Constructor ST_AddBand
